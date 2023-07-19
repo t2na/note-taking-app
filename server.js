@@ -1,5 +1,6 @@
 const fs = require('fs');
 const express = require('express');
+const uuid = require('uuid');
 const app = express();
 const path = require('path');
 const PORT = 3001;
@@ -9,7 +10,7 @@ app.use(express.json());
 
 app.use(express.urlencoded({
     extended: true
-}))
+}));
 
 app.use(express.static('public'));
 
@@ -22,15 +23,17 @@ app.get('/api/notes', (req, res) => {
     const notes = JSON.parse(saveNotes);
 
   res.json(notes);
-})
+});
 
 app.post('/api/notes', (req, res) => {
     const saveNotes = fs.readFileSync('./db/db.json', 'utf-8')
     const notes = JSON.parse(saveNotes);
 
-    console.log(req.body);
+    const newNote = req.body;
+    newNote.id = uuid.v4();
+    notes.push(newNote);
 
-    notes.push(req.body);
+    console.log(req.body);
 
     fs.writeFileSync('./db/db.json', JSON.stringify(notes));
 
@@ -39,7 +42,7 @@ app.post('/api/notes', (req, res) => {
     res.json({
         message: 'note was written'
     })
-})
+});
 
 app.get('*', (req, res) =>
   res.sendFile(path.join(__dirname, 'public/index.html'))
@@ -47,4 +50,9 @@ app.get('*', (req, res) =>
 
 app.listen(PORT, () => {
     console.log(`app listening on http://localhost:${PORT}`)
-})
+});
+
+
+// need a step before I push to notes array, I need to add an ID
+
+// check out npm uuid
